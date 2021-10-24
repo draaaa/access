@@ -1,0 +1,286 @@
+local ScreenGui = Instance.new("ScreenGui")
+local ClipsTxt = Instance.new("TextLabel")
+local BulletsTxt = Instance.new("TextLabel")
+ScreenGui.Parent = game.CoreGui
+ClipsTxt.Name = "ClipsTxt"
+ClipsTxt.Parent = ScreenGui
+ClipsTxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ClipsTxt.BackgroundTransparency = 1.000
+ClipsTxt.Position = UDim2.new(0.31775701, 0, 0.719123483, 0)
+ClipsTxt.Size = UDim2.new(0, 200, 0, 50)
+ClipsTxt.Font = Enum.Font.SourceSansBold
+ClipsTxt.Text = "Clips:"
+ClipsTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClipsTxt.TextSize = 20.000
+ClipsTxt.Visible = false
+
+BulletsTxt.Name = "BulletsTxt"
+BulletsTxt.Parent = ScreenGui
+BulletsTxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+BulletsTxt.BackgroundTransparency = 1.000
+BulletsTxt.Position = UDim2.new(0.449766338, 0, 0.719123483, 0)
+BulletsTxt.Size = UDim2.new(0, 200, 0, 50)
+BulletsTxt.Font = Enum.Font.SourceSansBold
+BulletsTxt.Text = "Bullets:"
+BulletsTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+BulletsTxt.TextSize = 20.000
+BulletsTxt.Visible = false
+game.Players.LocalPlayer.PlayerGui.HUD:FindFirstChild("Ammo"):Destroy()
+
+function CustomAmmoUI()
+local gunequipped = false
+for _,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+	if v:IsA("Tool") then
+		if v ~= nil then	
+		v.Equipped:Connect(function()
+		if v:FindFirstChild("Clips") and v:FindFirstChild("Ammo") then		
+		wait(.1)
+		ClipsTxt.Text = "Clips:"
+		BulletsTxt.Text = "Bullets:"		
+		gunequipped = true	
+		BulletsTxt.Visible = true
+		ClipsTxt.Visible = true
+		repeat	
+		BulletsTxt.Text = "Bullets: "..v:FindFirstChild("Ammo").Value..""
+		ClipsTxt.Text = "Clips: "..v:FindFirstChild("Clips").Value..""
+		game:GetService("RunService").Heartbeat:Wait()	
+		until gunequipped == false
+		else
+			return nil			
+		end				
+		end)
+		v.Unequipped:Connect(function()
+		ClipsTxt.Text = "Clips:"
+		BulletsTxt.Text = "Bullets:"
+		gunequipped = false	
+		BulletsTxt.Visible = false
+		ClipsTxt.Visible = false
+		end)
+	end			
+	end	
+	end	
+end
+CustomAmmoUI()
+
+game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
+game.Players.LocalPlayer.Character.Humanoid:UnequipTools()
+end)
+game.Players.LocalPlayer.CharacterAdded:Connect(function()	
+local hud = game.Players.LocalPlayer.PlayerGui:WaitForChild("HUD")
+hud.Ammo:Destroy()
+wait(1)
+CustomAmmoUI()	
+end)
+
+---------------------------------------------------
+local localp = game:GetService("Players").LocalPlayer
+local RS = game:GetService("RunService")
+function notify(NTitle, NText, NIcon, NDuration)
+    game.StarterGui:SetCore("SendNotification",{
+		Title = NTitle;
+		Text = NText;
+		Icon = NIcon;
+		Duration = NDuration;
+	})
+ end
+  notify("JAH", "is a bitch")
+RS.RenderStepped:Connect(function()
+    local function GunSkins(GunTable, Color, Material)
+		for _, v in pairs(GunTable:GetChildren()) do
+			if v:IsA"Tool" and v:FindFirstChild"Fire" then
+				for _, i in pairs(v:GetDescendants()) do 
+					if i:IsA"UnionOperation" or i:IsA"Part" or i:IsA"MeshPart" then 
+						if i:IsA"UnionOperation" then 
+							i.UsePartColor = true
+						end
+						i.Material = Material
+						i.Color = Color
+					end
+				end
+			end
+		end
+	end
+	GunSkins(localp.Backpack, Color3.fromRGB(49,133,224), "ForceField") -- you can change color here.
+end)
+---------------------------------------------------
+--Bullet Trails--
+
+local RunService = game:GetService("RunService")
+
+RunService.RenderStepped:Connect(function()
+    if game.Players.LocalPlayer.Character.Humanoid then
+        --print("humanoid exists")
+        if game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet") then
+            print("bullet exists")
+            if game.Players.LocalPlayer.Character.Humanoid.Bullet:findFirstChild("Trail") then
+                print("trail exists")
+                if game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Name == "BulletDone" then
+                    print("bullet done")
+                end
+                if game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet"):findFirstChild("Trail").Lifetime < 0.21 then
+                    print("success!")
+                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Trail.Lifetime = 0.3
+                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Trail.Transparency = NumberSequence.new(0)
+                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Trail.Color = ColorSequence.new(Color3.fromRGB(49,133,224),Color3.fromRGB(165,26,105))
+                    game.Players.LocalPlayer.Character.Humanoid:findFirstChild("Bullet").Name = "BulletDone"
+                end
+            end
+        end
+    end
+end) 
+-----------------------------------
+-- chat --
+--chat "/spy" to toggle!
+enabled = true
+--if true will check your messages too
+spyOnMyself = true
+--if true will chat the logs publicly (fun, risky)
+public = false
+--if true will use /me to stand out
+publicItalics = true
+--customize private logs
+privateProperties = {
+	Color = Color3.fromRGB(165,26,105); 
+	Font = Enum.Font.SourceSansBold;
+	TextSize = 18;
+}
+--////////////////////////////////////////////////////////////////
+  --spychat--
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait() or Players.LocalPlayer
+local saymsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest")
+local getmsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("OnMessageDoneFiltering")
+local instance = (_G.chatSpyInstance or 0) + 1
+_G.chatSpyInstance = instance
+
+local function onChatted(p,msg)
+	if _G.chatSpyInstance == instance then
+		if p==player and msg:lower():sub(1,4)=="/spy" then
+			enabled = not enabled
+			wait(0.3)
+			privateProperties.Text = "{SPY "..(enabled and "EN" or "DIS").."ABLED}"
+			StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
+		elseif enabled and (spyOnMyself==true or p~=player) then
+			msg = msg:gsub("[\n\r]",''):gsub("\t",' '):gsub("[ ]+",' ')
+			local hidden = true
+			local conn = getmsg.OnClientEvent:Connect(function(packet,channel)
+				if packet.SpeakerUserId==p.UserId and packet.Message==msg:sub(#msg-#packet.Message+1) and (channel=="All" or (channel=="Team" and public==false and Players[packet.FromSpeaker].Team==player.Team)) then
+					hidden = false
+				end
+			end)
+			wait(1)
+			conn:Disconnect()
+			if hidden and enabled then
+				if public then
+					saymsg:FireServer((publicItalics and "/me " or '').."{SPY} [".. p.Name .."]: "..msg,"All")
+				else
+					privateProperties.Text = "{SPY} [".. p.Name .."]: "..msg
+					StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
+				end
+			end
+		end
+	end
+end
+
+for _,p in ipairs(Players:GetPlayers()) do
+	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
+end
+Players.PlayerAdded:Connect(function(p)
+	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
+end)
+privateProperties.Text = "{SPY "..(enabled and "EN" or "DIS").."ABLED}"
+StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
+if not player.PlayerGui:FindFirstChild("Chat") then wait(3) end
+local chatFrame = player.PlayerGui.Chat.Frame
+chatFrame.ChatChannelParentFrame.Visible = true
+chatFrame.ChatBarParentFrame.Position = chatFrame.ChatChannelParentFrame.Position+UDim2.new(UDim.new(),chatFrame.ChatChannelParentFrame.Size.Y)
+
+--////////////////////////////////////////////////////////////////
+local lighting = game.Lighting
+  if lighting:FindFirstChild("ColorCorrection") then
+   lighting:FindFirstChild("ColorCorrection"):Remove()
+  end
+  if lighting:FindFirstChild("Correction") then
+   lighting:FindFirstChild("Correction"):Remove()
+  end
+
+  local sky = lighting.Sky
+  sky.SkyboxBk = "http://www.roblox.com/asset/?id=7818101396"
+  sky.SkyboxDn = "http://www.roblox.com/asset/?id=7818101845"
+  sky.SkyboxFt = "http://www.roblox.com/asset/?id=7818102760"
+  sky.SkyboxLf = "http://www.roblox.com/asset/?id=7818103635"
+  sky.SkyboxRt = "http://www.roblox.com/asset/?id=7818104100"
+  sky.SkyboxUp = "http://www.roblox.com/asset/?id=7818104600"
+ 
+  sky.StarCount = 3000
+  sky.SunAngularSize = 21
+  sky.MoonAngularSize = 11
+ 
+  local correction = Instance.new("ColorCorrectionEffect", lighting)
+  correction.Name = "Correction"
+  correction.Saturation = -0.4
+  correction.TintColor = Color3.fromRGB(233,204,255)
+--////////////////////////////////////////////////////////////////
+local lighting = game.Lighting
+        if lighting:FindFirstChild("ColorCorrection") then
+            lighting:FindFirstChild("ColorCorrection"):Remove()
+        end
+        if lighting:FindFirstChild("Correction") then
+            lighting:FindFirstChild("Correction"):Remove()
+        end
+        
+        local sunray = Instance.new("SunRaysEffect", lighting)
+        local sky = lighting.Sky
+        sky.SkyboxBk = "http://www.roblox.com/asset/?id=7818101396"
+        sky.SkyboxDn = "http://www.roblox.com/asset/?id=7818101845"
+        sky.SkyboxFt = "http://www.roblox.com/asset/?id=7818102760"
+        sky.SkyboxLf = "http://www.roblox.com/asset/?id=7818103635"
+        sky.SkyboxRt = "http://www.roblox.com/asset/?id=7818104100"
+        sky.SkyboxUp = "http://www.roblox.com/asset/?id=7818104600"
+        
+        sky.StarCount = 3000
+        sky.SunAngularSize = 21
+        sky.MoonAngularSize = 11
+        
+        local correction = Instance.new("ColorCorrectionEffect", lighting)
+        correction.Name = "Correction"
+        correction.Saturation = -0.4
+  
+--////////////////////////////////////////////////////////////////
+  -- Reset Key --
+game.StarterGui:SetCore("SendNotification", {
+    Title = "NEBULA";
+    Text = "maah niggas digi n jah r SEXY!";
+    Icon = "http://www.roblox.com/asset/?id=42113161";
+})
+
+game.Players.LocalPlayer:GetMouse().KeyDown:Connect(function(KeyPressed)
+    if KeyPressed == "r" then
+    game.Players.LocalPlayer.Character.Humanoid.Health = 0
+end
+end)
+-----------------------------------
+game.Players.LocalPlayer.Character.Humanoid.StateChanged:Connect(function(old, new)
+    if new == Enum.HumanoidStateType.FallingDown or new == Enum.HumanoidStateType.PlatformStanding then
+	    game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
+	    game.Players.LocalPlayer.Character.Humanoid.Sit = false
+	    game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	    game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+    end
+end)
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    repeat wait() until char:FindFirstChild("Humanoid")
+    char.Humanoid.StateChanged:Connect(function(old, new)
+	    if new == Enum.HumanoidStateType.FallingDown or new == Enum.HumanoidStateType.PlatformStanding then
+	        char.Humanoid.PlatformStand = false
+	        char.Humanoid.Sit = false
+	        char.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	        char.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+	    end
+    end)
+end)
+
+-- Made by Aidez :OOO
+-- Join my discord?: https://discord.gg/4FCbEbZ
